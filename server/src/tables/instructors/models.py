@@ -1,4 +1,4 @@
-from src.database import Base, int_pk, photo_blob
+from src.dao.database import Base, photo_blob
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from sqlalchemy import ForeignKey, func
 from datetime import date
@@ -6,7 +6,6 @@ from src.tables.departments.models import Department
 
 
 class Instructor(Base):
-    id: Mapped[int_pk]
     first_name: Mapped[str]
     last_name: Mapped[str]
     birth_date: Mapped[date]
@@ -22,13 +21,3 @@ class Instructor(Base):
 
     def __repr__(self):
         return str(self)
-    
-    def to_dict(self):
-        return {
-            'id': self.id,
-            'first_name': self.first_name,
-            'last_name': self.last_name,
-            'birth_date': self.birth_date,
-            'photo': self.photo,
-            'department_id': self.department_id
-        }

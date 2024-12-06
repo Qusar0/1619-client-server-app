@@ -12,7 +12,8 @@ from os.path import dirname, abspath
 
 sys.path.insert(0, dirname(dirname(abspath(__file__))))
 
-from src.database import DATABASE_URL, Base
+from src.dao.database import Base
+from src.dao.session_maker import DATABASE_URL
 from src.tables.departments.models import Department
 from src.tables.instructors.models import Instructor
 from src.tables.groups.models import Group

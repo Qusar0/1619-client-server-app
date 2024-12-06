@@ -1,4 +1,4 @@
-from src.database import Base, int_pk, str_uniq
+from src.dao.database import Base, str_uniq
 from sqlalchemy.orm import relationship, Mapped
 from src.tables.subjects.models import Subject
 from src.tables.students.models import Student
@@ -7,9 +7,7 @@ from src.tables.groups.models import Group
 from src.tables.students_subjects.models import StudentSubject
 
 
-
 class Department(Base):
-    id: Mapped[int_pk]
     name: Mapped[str_uniq]
 
     instructors: Mapped[list['Instructor']] = relationship('Instructor', back_populates='department')

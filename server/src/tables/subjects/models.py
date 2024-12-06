@@ -1,10 +1,9 @@
-from src.database import Base, str_uniq, int_pk
+from src.dao.database import Base, str_uniq
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from sqlalchemy import ForeignKey
 from src.tables.students_subjects.models import StudentSubject
 
 class Subject(Base):
-    id: Mapped[int_pk]
     name: Mapped[str_uniq]
     department_id: Mapped[int] = mapped_column(ForeignKey('departments.id'), nullable=False)
 

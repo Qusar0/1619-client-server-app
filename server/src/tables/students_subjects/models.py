@@ -1,10 +1,9 @@
-from src.database import Base, int_pk
+from src.dao.database import Base
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from sqlalchemy import ForeignKey
 
 
 class StudentSubject(Base):
-    id: Mapped[int_pk]
     student_id: Mapped[int] = mapped_column(ForeignKey('students.id'), nullable=False)
     subject_id: Mapped[int] = mapped_column(ForeignKey('subjects.id'), nullable=False)
     rate_id: Mapped[int] = mapped_column(ForeignKey('rates.id'), nullable=False)
