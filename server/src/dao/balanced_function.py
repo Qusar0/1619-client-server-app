@@ -4,27 +4,25 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.tables.instructors.dao import InstructorDAO
 from src.tables.students.dao import StudentDAO
 from src.tables.groups.dao import GroupDAO
+from src.tables.departments.schemas import DepartmentModel
 from pydantic import create_model
 
+MAX_STUDENTS_PER_GROUP = 10
+
 def calculate_group_distribution(student_count: int, instructor_count: int) -> Tuple[int, int, int]:
-    print(student_count, instructor_count)
     if student_count <= 0 and instructor_count <= 0:
         return 0, 0
-    
-    if student_count <= 0 or instructor_count <= 0:
-        return 1, 1
-    
-    student_in_group = ceil(student_count / 10)
+
+    student_in_group = ceil(student_count / MAX_STUDENTS_PER_GROUP)
     min_student_instructor = min(student_count, instructor_count)
 
     group_count = max(student_in_group, min_student_instructor)
-    average_students_per_group = ceil(student_count / group_count)
+    average_students_per_group = ceil(student_count / group_count) if group_count else 0
 
     return group_count, average_students_per_group
 
 
 async def balanced_function(department_id: int, session: AsyncSession):
-    DepartmentModel = create_model('DepartmentModel', department_id=(int, ...))
     department = DepartmentModel(department_id=department_id)
 
     instructors = await InstructorDAO.find_all(session=session, filters=department)
@@ -38,7 +36,7 @@ async def balanced_function(department_id: int, session: AsyncSession):
     current_groups = await GroupDAO.find_all(session=session, filters=department)
     current_group_count = len(current_groups)
 
-    if current_group_count == 0:
+    if current_group_count == 0 and average_students_per_group != 0:
         await GroupDAO.add_group(department_id=department_id, session=session)
     if current_group_count > group_count:
         extra_groups = current_groups[group_count:]
@@ -66,7 +64,6 @@ async def balanced_function(department_id: int, session: AsyncSession):
         group.instructor_id = instructor.id
 
     student_batches = [students[i:i + average_students_per_group] for i in range(0, len(students), average_students_per_group if average_students_per_group else 1)]
-    print(student_batches)
     assert len(student_batches) <= len(updated_groups), "Неверное распределение групп и студентов"
 
     for group, student_batch in zip(updated_groups, student_batches):
