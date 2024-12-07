@@ -8,6 +8,7 @@ class SInstructorSelect(BaseModel):
     id: int
     first_name: str = Field(..., min_length=1, max_length=50, description="Имя куратора, от 1 до 50 символов")
     last_name: str = Field(..., min_length=1, max_length=50, description="Фамилия куратора, от 1 до 50 символов")
+    department_id: int = Field(..., ge=1, description="ID кафедры")
     department: str = Field(..., description="Название кафедры")
     groups: Optional[list[str]] = Field(None, description="Группы куратора")
 

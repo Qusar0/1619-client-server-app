@@ -35,7 +35,7 @@ async def add_instructor(instructor: SInstructorAdd, session: AsyncSession = Tra
 async def update_instructor(id: int, instructor_data: SInstructorAdd, session: AsyncSession = TransactionSessionDep) -> dict:
     instructor = await InstructorDAO.find_one_or_none_by_id(data_id=id, session=session)
     if instructor is None:
-        return
+        return {'message': f'Куратор с ID {id} не найден!'}
     
     instructor_department_id = instructor.department_id
 
@@ -56,9 +56,8 @@ async def update_instructor(id: int, instructor_data: SInstructorAdd, session: A
         return {"message": "Ошибка при обновлении данных куратора!"}
 
 @router.delete('/delete/{id}', summary='Удалить куратора по ID')
-async def delete_instructor(id: int, session: AsyncSession = TransactionSessionDep):
+async def delete_instructor(id: int, session: AsyncSession = TransactionSessionDep) -> dict:
     instructor = await InstructorDAO.find_one_or_none_by_id(data_id=id, session=session)
-
     if instructor:
         department = DepartmentModel(department_id=instructor.department_id)
 

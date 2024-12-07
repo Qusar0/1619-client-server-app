@@ -47,7 +47,7 @@ class InstructorDAO(BaseDAO[Instructor]):
             return None
 
         instructor_data = instructor_info.to_dict()
-        instructor_data['department'] = instructor_info.department.name if instructor_info.department else None
+        instructor_data['department'] = instructor_info.department.name
         instructor_data['groups'] = [group.name for group in instructor_info.groups] if instructor_info.groups else []
 
         return instructor_data

@@ -48,9 +48,11 @@ class StudentDAO(BaseDAO[Student]):
         
         result = await session.execute(query)
         student = result.scalar_one_or_none()
+        if student is None:
+            return
 
         student_data = {
-                'id': student.id,
+                'id': student_id,
                 'first_name': student.first_name,
                 'last_name': student.last_name,
                 'group': student.group.name,

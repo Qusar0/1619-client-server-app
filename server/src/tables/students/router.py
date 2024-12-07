@@ -1,14 +1,15 @@
 from fastapi import APIRouter
+from sqlalchemy.ext.asyncio import AsyncSession
+from typing import Union
+
 from src.tables.students.dao import StudentDAO
 from src.tables.instructors.dao import InstructorDAO
 from src.tables.students.schemas import SStudentAdd, SStudentSelect, SStudentUpdate
-from typing import Union
-from sqlalchemy.ext.asyncio import AsyncSession
-from src.dao.session_maker import SessionDep, TransactionSessionDep
-
 from src.tables.groups.dao import GroupDAO
-from src.dao.balanced_function import balanced_function
 from src.tables.departments.schemas import DepartmentModel
+
+from src.dao.session_maker import SessionDep, TransactionSessionDep
+from src.dao.balanced_function import balanced_function
 
 router = APIRouter(prefix='/students', tags=['Работа со студентами'])
 
@@ -16,8 +17,15 @@ router = APIRouter(prefix='/students', tags=['Работа со студента
 async def get_students(session: AsyncSession = SessionDep) -> list[SStudentSelect]:
     return await StudentDAO.find_full_data_students(session)
 
+@router.get('/{id}', summary='Получить студента по ID')
+async def get_student_by_id(student_id: int, session: AsyncSession = SessionDep) -> Union[SStudentSelect, dict]:
+    result = await StudentDAO.find_full_data_student_by_id( student_id=student_id, session=session)
+    if result is None:
+        return {'message': f'Студент с ID {student_id} не найден!'}
+    return result
+
 @router.post('/add/', summary='Добавить студента')
-async def add_student(department_id: int, student: SStudentAdd, session: AsyncSession = TransactionSessionDep):
+async def add_student(department_id: int, student: SStudentAdd, session: AsyncSession = TransactionSessionDep) -> dict:
     department = DepartmentModel(department_id=department_id)
 
     instructors = await InstructorDAO.find_all(session=session, filters=department)
@@ -25,7 +33,7 @@ async def add_student(department_id: int, student: SStudentAdd, session: AsyncSe
             return {"message": "Невозможно добавить студента на кафедру без куратора!"}
 
     current_groups = await GroupDAO.find_all(session=session, filters=department)
-    if len(current_groups) == 0:
+    if not len(current_groups):
         group_id = await GroupDAO.add_group(department_id=department_id, session=session)
     else:
         group_id = current_groups[0].id
@@ -37,10 +45,10 @@ async def add_student(department_id: int, student: SStudentAdd, session: AsyncSe
     return {"message": "Студент не был добавлен!"}
 
 @router.put('/update/{id}', summary='Обновить данные студента по ID')
-async def update_student(id: int, student_data: SStudentUpdate, session: AsyncSession = TransactionSessionDep):# -> dict
+async def update_student(id: int, student_data: SStudentUpdate, session: AsyncSession = TransactionSessionDep) -> dict:
     student = await StudentDAO.find_full_data_student_by_id(student_id=id, session=session)
     if student is None:
-        return
+        return {"message": f"Не удалось найти студента с ID {id}!"}
     
     student_department_id = student.get('department_id')
 
@@ -61,7 +69,7 @@ async def update_student(id: int, student_data: SStudentUpdate, session: AsyncSe
 
 
 @router.delete('/{id}', summary='Удалить студента по ID')
-async def delete_student(id: int, session: AsyncSession = TransactionSessionDep):
+async def delete_student(id: int, session: AsyncSession = TransactionSessionDep) -> dict:
     student = await StudentDAO.find_one_or_none_by_id(data_id=id, session=session)
     if student:
         group = await GroupDAO.find_one_or_none_by_id(data_id=student.group_id, session=session)
