@@ -1,20 +1,23 @@
-from src.dao.base import BaseDAO
-from src.tables.students.models import Student
-from src.tables.students.schemas import SStudentAdd, SStudentUpdate
-from src.tables.groups.models import Group
-from src.tables.groups.dao import GroupDAO
 from sqlalchemy.orm import joinedload
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.exc import SQLAlchemyError
+
+from src.dao.base import BaseDAO
 from src.tables.departments.schemas import DepartmentModel
+from src.tables.students.models import Student
+from src.tables.students.schemas import SStudentAdd, SStudentUpdate, SStudentSelect
+from src.tables.groups.models import Group
+from src.tables.students_subjects.models import StudentSubject
+from src.tables.groups.dao import GroupDAO
+from src.tables.students_subjects.schemas import SStudentSubject
 
 
 class StudentDAO(BaseDAO[Student]):
     model = Student
 
     @classmethod
-    async def find_full_data_students(cls, session: AsyncSession) -> dict:
+    async def find_full_data_students(cls, session: AsyncSession) -> list[SStudentSelect]:
         query = select(cls.model).options(
             joinedload(cls.model.group)
             .joinedload(Group.department)
@@ -28,37 +31,49 @@ class StudentDAO(BaseDAO[Student]):
 
         students_data = []
         for student in students:
-            students_data.append({
-                'id': student.id,
-                'first_name': student.first_name,
-                'last_name': student.last_name,
-                'group': student.group.name if student.group else None,
-                'department': student.group.department.name if student.group and student.group.department else None,
-            })
+            student = SStudentSelect(
+                id=student.id,
+                first_name=student.first_name,
+                last_name=student.last_name,
+                group=student.group.name,
+                department_id=student.group.department.id,
+                department=student.group.department.name
+            )
+            students_data.append(student)
 
         return students_data
     
-
     @classmethod
-    async def find_full_data_student_by_id(cls, student_id: int, session: AsyncSession) -> dict:
+    async def find_full_data_student_by_id(cls, student_id: int, session: AsyncSession) -> SStudentSelect:
         query = select(cls.model).options(
-            joinedload(cls.model.group)
-            .joinedload(Group.department)
+            joinedload(cls.model.group).joinedload(Group.department),
+            joinedload(cls.model.studentSubject).joinedload(StudentSubject.subject),
+            joinedload(cls.model.studentSubject).joinedload(StudentSubject.rate)
         ).where(cls.model.id == student_id)
         
         result = await session.execute(query)
-        student = result.scalar_one_or_none()
+        student = result.unique().scalar_one_or_none()
         if student is None:
             return
 
-        student_data = {
-                'id': student_id,
-                'first_name': student.first_name,
-                'last_name': student.last_name,
-                'group': student.group.name,
-                'department_id': student.group.department_id,
-                'department': student.group.department.name
-            }
+        subjects = []
+        if student.studentSubject:
+            subjects = [SStudentSubject(
+                        subject_id=subj.subject.id,
+                        subject_name=subj.subject.name,
+                        rate_id=subj.rate.id,
+                        rate=subj.rate.name)
+                    for subj in student.studentSubject] 
+
+        student_data = SStudentSelect(
+            id=student.id,
+            first_name=student.first_name,
+            last_name=student.last_name,
+            group=student.group.name,
+            department_id=student.group.department.id,
+            department=student.group.department.name,
+            subjects=subjects
+        )
 
         return student_data
     
@@ -76,7 +91,6 @@ class StudentDAO(BaseDAO[Student]):
             
             return result.scalars().all()
         except SQLAlchemyError as e:
-            print(f"Error occurred while counting rows: {e}")
             raise
 
     @classmethod
@@ -122,5 +136,4 @@ class StudentDAO(BaseDAO[Student]):
             return True
         except SQLAlchemyError as e:
             await session.rollback()
-            print(f"Ошибка при обновлении студента: {e}")
             raise e

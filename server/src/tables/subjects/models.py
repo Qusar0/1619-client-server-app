@@ -8,7 +8,7 @@ class Subject(Base):
     department_id: Mapped[int] = mapped_column(ForeignKey('departments.id'), nullable=False)
 
     department: Mapped['Department'] = relationship('Department', back_populates='subjects')
-    studentSubject: Mapped['StudentSubject'] = relationship('StudentSubject', back_populates='subject')
+    studentSubject: Mapped[list['StudentSubject']] = relationship('StudentSubject', back_populates='subject')
 
     def __str__(self):
         return (f"{self.__class__.__name__}(id={self.id}, name={self.name})")

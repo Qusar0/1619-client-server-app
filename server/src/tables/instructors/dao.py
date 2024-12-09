@@ -26,6 +26,7 @@ class InstructorDAO(BaseDAO[Instructor]):
                 'id': instructor.id,
                 'first_name': instructor.first_name,
                 'last_name': instructor.last_name,
+                'department_id': instructor.department.id,
                 'department': instructor.department.name,
                 'groups': [group.name for group in instructor.groups] if instructor.groups else []
             }

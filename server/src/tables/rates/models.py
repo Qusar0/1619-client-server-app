@@ -1,7 +1,5 @@
 from src.dao.database import Base, str_uniq
-from sqlalchemy.orm import relationship, Mapped, mapped_column
-from sqlalchemy import ForeignKey, func
-from datetime import date
+from sqlalchemy.orm import relationship, Mapped
 
 
 class Rate(Base):

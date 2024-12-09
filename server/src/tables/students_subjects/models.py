@@ -1,6 +1,7 @@
 from src.dao.database import Base
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from sqlalchemy import ForeignKey
+from src.tables.rates.models import Rate
 
 
 class StudentSubject(Base):

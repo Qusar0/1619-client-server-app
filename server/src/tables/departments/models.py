@@ -2,7 +2,6 @@ from src.dao.database import Base, str_uniq
 from sqlalchemy.orm import relationship, Mapped
 from src.tables.subjects.models import Subject
 from src.tables.students.models import Student
-from src.tables.rates.models import Rate
 from src.tables.groups.models import Group
 from src.tables.students_subjects.models import StudentSubject
 
