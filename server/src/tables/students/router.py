@@ -39,8 +39,9 @@ async def add_student(department_id: int, student: SStudentAdd, session: AsyncSe
     else:
         group_id = current_groups[0].id
 
-    check = await StudentDAO.add_student(group_id=group_id, student=student, session=session)
-    if check:
+    student_id = await StudentDAO.add_student(group_id=group_id, student=student, session=session)
+    if student_id:
+        await StudentDAO.add_student_subjects(student_id=student_id, department_id=department_id, session=session)
         balancer = GroupBalancer(department_id=department_id, session=session)
         await balancer.balance()
         return {"message": "Студент успешно добавлен!"}

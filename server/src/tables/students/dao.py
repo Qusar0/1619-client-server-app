@@ -10,8 +10,9 @@ from src.tables.students.schemas import SStudentAdd, SStudentUpdate, SStudentSel
 from src.tables.groups.models import Group
 from src.tables.students_subjects.models import StudentSubject
 from src.tables.groups.dao import GroupDAO
-from src.tables.students_subjects.schemas import SStudentSubject
-
+from src.tables.students_subjects.schemas import SStudentSubjectSelect, SStudentSubjectAdd
+from src.tables.students_subjects.dao import StudentSubjectDAO
+from src.tables.subjects.models import Subject
 
 class StudentDAO(BaseDAO[Student]):
     model = Student
@@ -58,7 +59,7 @@ class StudentDAO(BaseDAO[Student]):
 
         subjects = []
         if student.studentSubject:
-            subjects = [SStudentSubject(
+            subjects = [SStudentSubjectSelect(
                         subject_id=subj.subject.id,
                         subject_name=subj.subject.name,
                         rate_id=subj.rate.id,
@@ -101,10 +102,29 @@ class StudentDAO(BaseDAO[Student]):
         session.add(new_student)
         try:
             await session.commit()
-            return True
+            return new_student.id
         except SQLAlchemyError as e:
             await session.rollback()
             raise e
+        
+    @classmethod
+    async def add_student_subjects(cls, student_id: int, department_id: int, session: AsyncSession):
+        query = select(Subject.id).where(Subject.department_id == department_id)
+
+        result = await session.execute(query)
+
+        subjects_ids = result.scalars().all()
+
+        student_subjects = [
+            SStudentSubjectAdd(
+                student_id=student_id,
+                subject_id=subject_id,
+                rate_id=1
+            )
+            for subject_id in subjects_ids
+        ]
+
+        await StudentSubjectDAO.add_many(session=session, instances=student_subjects)
         
     @classmethod
     async def update_student(cls, student_id: int, updated_data: SStudentUpdate, session: AsyncSession) -> bool:

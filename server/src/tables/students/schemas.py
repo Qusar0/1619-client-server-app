@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, field_validator
-from src.tables.students_subjects.schemas import SStudentSubject
+from src.tables.students_subjects.schemas import SStudentSubjectSelect
 from datetime import date, datetime
 from typing import Optional
 
@@ -11,7 +11,7 @@ class SStudentSelect(BaseModel):
     group: str = Field(..., description="Номер группы")
     department_id: int = Field(..., ge=1, description="ID кафедры")
     department: str = Field(..., description="Название кафедры")
-    subjects: Optional[list[SStudentSubject]] = Field(None, description="Список предметов и оценок")
+    subjects: Optional[list[SStudentSubjectSelect]] = Field(None, description="Список предметов и оценок")
 
 
 class SStudentAdd(BaseModel):
