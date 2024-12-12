@@ -13,7 +13,7 @@ from os.path import dirname, abspath
 sys.path.insert(0, dirname(dirname(abspath(__file__))))
 
 from src.dao.database import Base
-from src.dao.session_maker import DATABASE_URL
+from src.dao.session_maker import ASYNC_DATABASE_URL
 from src.tables.departments.models import Department
 from src.tables.instructors.models import Instructor
 from src.tables.groups.models import Group
@@ -25,7 +25,7 @@ from src.tables.rates.models import Rate
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
-config.set_main_option("sqlalchemy.url", DATABASE_URL)
+config.set_main_option("sqlalchemy.url", ASYNC_DATABASE_URL)
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
 if config.config_file_name is not None:

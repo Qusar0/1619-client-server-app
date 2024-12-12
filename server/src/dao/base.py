@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from sqlalchemy import select, update, delete, func
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import Session
 from src.dao.database import Base
 
 T = TypeVar("T", bound=Base)
@@ -30,14 +31,22 @@ class BaseDAO(Generic[T]):
             raise
 
     @classmethod
-    async def find_all(cls, session: AsyncSession, filters: BaseModel | None = None):
-        if filters:
-            filter_dict = filters.model_dump(exclude_unset=True)
-        else:
-            filter_dict = {}
+    async def async_find_all(cls, session: AsyncSession, filters: BaseModel | None = None):
+        filter_dict = filters.model_dump(exclude_unset=True) if filters else {}
         try:
             query = select(cls.model).filter_by(**filter_dict)
             result = await session.execute(query)
+            records = result.scalars().all()
+            return records
+        except SQLAlchemyError as e:
+            raise
+
+    @classmethod
+    def sync_find_all(cls, session: Session, filters: BaseModel | None = None):
+        filter_dict = filters.model_dump(exclude_unset=True) if filters else {}
+        try:
+            query = select(cls.model).filter_by(**filter_dict)
+            result = session.execute(query)
             records = result.scalars().all()
             return records
         except SQLAlchemyError as e:
@@ -98,12 +107,23 @@ class BaseDAO(Generic[T]):
             raise
 
     @classmethod
-    async def delete_one_by_id(cls, data_id: int, session: AsyncSession):
+    async def async_delete_one_by_id(cls, data_id: int, session: AsyncSession):
         try:
             data = await session.get(cls.model, data_id)
             if data:
                 await session.delete(data)
                 await session.flush()
+        except SQLAlchemyError as e:
+            print(f"Error occurred: {e}")
+            raise
+
+    @classmethod
+    async def sync_delete_one_by_id(cls, data_id: int, session: Session):
+        try:
+            data = session.get(cls.model, data_id)
+            if data:
+                session.delete(data)
+                session.flush()
         except SQLAlchemyError as e:
             print(f"Error occurred: {e}")
             raise

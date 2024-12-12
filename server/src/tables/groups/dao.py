@@ -3,6 +3,7 @@ from src.tables.groups.models import Group
 from sqlalchemy import event
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import Session
 from random import randint
 
 
@@ -10,16 +11,29 @@ class GroupDAO(BaseDAO[Group]):
     model = Group
 
     @classmethod
-    async def add_group(cls, department_id: int, session: AsyncSession):
+    async def async_add_group(cls, department_id: int, session: AsyncSession):
         new_group = cls.model()
         new_group.department_id = department_id
         session.add(new_group)
         try:
             await session.commit()
+            return new_group.id
         except SQLAlchemyError as e:
             await session.rollback()
             raise e
-        return new_group.id
+
+    @classmethod
+    def sync_add_group(cls, department_id: int, session: Session):
+        new_group = cls.model()
+        new_group.department_id = department_id
+        session.add(new_group)
+        try:
+            session.commit()
+            return new_group.id
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise e
+    
 
 group_names = [str(name) for name in range(100, 991, 10)]
 @event.listens_for(Group, 'before_insert')

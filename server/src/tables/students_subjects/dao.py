@@ -15,7 +15,6 @@ class StudentSubjectDAO(BaseDAO[StudentSubject]):
     async def update_many_by_student_id(cls, student_id: int, student_subjects: list[SStudentSubjectUpdate], session: AsyncSession,):
         for student_subject in student_subjects:
             query = select(cls.model).where(cls.model.student_id == student_id).where(cls.model.subject_id == student_subject.subject_id)
-            print(query)
             result = await session.execute(query)
             student_subject_data = result.scalar_one_or_none()
             

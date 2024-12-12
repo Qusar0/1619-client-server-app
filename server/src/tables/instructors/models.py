@@ -13,8 +13,8 @@ class Instructor(Base):
     photo: Mapped[photo_blob]
     department_id: Mapped[int] = mapped_column(ForeignKey('departments.id'), nullable=False)
 
-    department: Mapped['Department'] = relationship('Department', back_populates='instructors')
-    groups: Mapped[list['Group']] = relationship('Group', back_populates='instructor')
+    department: Mapped['Department'] = relationship('Department', back_populates='instructors', lazy="selectin")
+    groups: Mapped[list['Group']] = relationship('Group', back_populates='instructor', lazy="selectin")
 
     def __str__(self):
         return (f"{self.__class__.__name__}(id={self.id}, first_name={self.first_name}, last_name={self.last_name})")
