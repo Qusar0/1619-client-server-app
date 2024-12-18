@@ -5,10 +5,9 @@ from typing import Optional
 
 class SInstructorSelect(BaseModel):
     model_config = ConfigDict(from_attributes=True)
-    id: int
+    id: int = Field(..., ge=1, description="ID куратора")
     first_name: str = Field(..., min_length=1, max_length=50, description="Имя куратора, от 1 до 50 символов")
     last_name: str = Field(..., min_length=1, max_length=50, description="Фамилия куратора, от 1 до 50 символов")
-    department_id: Optional[int] = Field(..., ge=1, description="ID кафедры")
     department: str = Field(..., description="Название кафедры")
     groups: Optional[list[str]] = Field(None, description="Группы куратора")
 

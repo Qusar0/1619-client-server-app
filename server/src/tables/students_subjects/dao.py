@@ -1,11 +1,8 @@
 from src.dao.base import BaseDAO
 from src.tables.students_subjects.models import StudentSubject
 from src.tables.students_subjects.schemas import SStudentSubjectUpdate
-from sqlalchemy.orm import joinedload
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from sqlalchemy.exc import SQLAlchemyError
-from src.tables.departments.schemas import DepartmentModel
 
 
 class StudentSubjectDAO(BaseDAO[StudentSubject]):

@@ -1,5 +1,6 @@
 from src.dao.base import BaseDAO
 from src.tables.instructors.models import Instructor
+from src.tables.instructors.schemas import SInstructorSelect
 from sqlalchemy.orm import joinedload
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
@@ -22,14 +23,14 @@ class InstructorDAO(BaseDAO[Instructor]):
 
         instructors_data = []
         for instructor in instructors:
-            instructor_data = {
-                'id': instructor.id,
-                'first_name': instructor.first_name,
-                'last_name': instructor.last_name,
-                'department_id': instructor.department.id,
-                'department': instructor.department.name,
-                'groups': [group.name for group in instructor.groups] if instructor.groups else []
-            }
+            instructor_data = SInstructorSelect(
+                id=instructor.id,
+                first_name=instructor.first_name,
+                last_name=instructor.last_name,
+                department_id=instructor.department.id,
+                department=instructor.department.name,
+                groups=[group.name for group in instructor.groups] if instructor.groups else []
+            )
             instructors_data.append(instructor_data)
 
         return instructors_data

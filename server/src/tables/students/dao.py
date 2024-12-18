@@ -2,7 +2,6 @@ from sqlalchemy.orm import joinedload
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.orm import Session
 
 from src.dao.base import BaseDAO
 from src.tables.departments.schemas import DepartmentModel
@@ -80,7 +79,7 @@ class StudentDAO(BaseDAO[Student]):
         return student_data
     
     @classmethod
-    async def async_students_by_department_id(cls, department_id: int, session: AsyncSession):
+    async def students_by_department_id(cls, department_id: int, session: AsyncSession):
         try:
             query = (
                 select(cls.model)
@@ -90,22 +89,6 @@ class StudentDAO(BaseDAO[Student]):
             )
 
             result = await session.execute(query)
-            
-            return result.scalars().all()
-        except SQLAlchemyError as e:
-            raise
-
-    @classmethod
-    def sync_students_by_department_id(cls, department_id: int, session: Session):
-        try:
-            query = (
-                select(cls.model)
-                .join(cls.model.group)
-                .join(Group.department)
-                .where(Group.department_id == department_id)
-            )
-
-            result = session.execute(query)
             
             return result.scalars().all()
         except SQLAlchemyError as e:
@@ -158,9 +141,9 @@ class StudentDAO(BaseDAO[Student]):
             
             if updated_data.department_id:
                 depatment = DepartmentModel(department_id=updated_data.department_id)
-                groups = await GroupDAO.async_find_all(session=session, filters=depatment)
+                groups = await GroupDAO.find_all(session=session, filters=depatment)
                 if not len(groups):
-                    new_group = GroupDAO.async_add_group(department_id=updated_data.department_id)
+                    new_group = GroupDAO.add_group(department_id=updated_data.department_id)
 
                     session.add(new_group)
                     await session.flush()

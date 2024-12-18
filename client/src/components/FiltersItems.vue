@@ -1,16 +1,16 @@
 <template>
   <div>
     <div v-if="departments.length > 0">
-      <div class="filters-container">
-        <p @click="toggleDepartments" class="dropdown-header">Кафедры</p>
-        <div v-if="showDepartments" class="dropdown-content">
+      <div class="filters__container">
+        <p @click="toggleDepartments" class="dropdown__header">Кафедры</p>
+        <div v-if="showDepartments" class="dropdown__content">
           <div
-            class="checkbox-item"
-            v-for="(department, index) in departments"
-            :key="index"
+            class="checkbox__item"
+            v-for="department in departments"
+            :key="department.department_id"
           >
             <input type="checkbox" />
-            <p>{{ department }}</p>
+            <p>{{ department.department_name }}</p>
           </div>
         </div>
       </div>
@@ -18,11 +18,11 @@
   </div>
   <div>
     <div v-if="groups.length > 0">
-      <div class="filters-container">
-        <p @click="toggleGroups" class="dropdown-header">Группы</p>
-        <div v-if="showGroups" class="dropdown-content">
+      <div class="filters__container">
+        <p @click="toggleGroups" class="dropdown__header">Группы</p>
+        <div v-if="showGroups" class="dropdown__content">
           <div
-            class="checkbox-item"
+            class="checkbox__item"
             v-for="(group, index) in groups"
             :key="index"
           >
@@ -47,8 +47,9 @@ let showGroups = ref(false);
 const getDepartments = async () => {
   try {
     const responce = await api.get("/departments/");
-    departments.value = responce.data.departments_name;
-    console.log(departments.value);
+    console.log(responce.data);
+    departments.value = responce.data;
+    console.log(departments);
   } catch (error) {
     console.error("Ошибка при получении кафедр:", error);
   }
@@ -79,12 +80,12 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.checkbox-item {
+.checkbox__item {
   display: flex;
   gap: 5px;
 }
 
-.dropdown-header {
+.dropdown__header {
   cursor: pointer;
   background-color: #ffffff;
   border-radius: 5px;
@@ -93,7 +94,7 @@ onMounted(async () => {
   width: 230px;
 }
 
-.dropdown-content {
+.dropdown__content {
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -101,9 +102,11 @@ onMounted(async () => {
   padding: 5px 10px;
   border-radius: 5px;
   background-color: #ffffff;
+  max-height: 200px;
+  overflow-y: auto;
 }
 
-.filters-container {
+.filters__container {
   display: flex;
   flex-direction: column;
   align-items: end;

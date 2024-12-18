@@ -1,17 +1,17 @@
 <template>
   <div class="side_bar">
-    <div class="buttons_container">
-      <div class="buttons-filters">
+    <div class="buttons__container">
+      <div class="buttons__filters">
         <div class="container">
           <div
             class="buttons"
-            :class="{ active: activeButton === 'instructorButtons' }"
-            @click="toggleButtons('instructorButtons')"
+            :class="{ active: activeButton === 'instructors' }"
+            @click="toggleButtons('instructors')"
           >
-            <button class="people_btn">Преподаватели</button>
+            <button class="people__btn">Преподаватели</button>
             <button
-              class="filter_btn"
-              @click.stop="toggleFilters('instructorFilters', 'instructorButtons')"
+              class="filter__btn"
+              @click.stop="toggleFilters('instructorFilters', 'instructors')"
             >
               <img src="/src/assets/filter.png" alt="" />
             </button>
@@ -20,17 +20,17 @@
         <FiltersItems v-if="visibleFilters === 'instructorFilters'" />
       </div>
 
-      <div class="buttons-filters">
+      <div class="buttons__filters">
         <div class="container">
           <div
             class="buttons"
-            :class="{ active: activeButton === 'studentButtons' }"
-            @click="toggleButtons('studentButtons')"
+            :class="{ active: activeButton === 'students' }"
+            @click="toggleButtons('students')"
           >
-            <button class="people_btn">Студенты</button>
+            <button class="people__btn">Студенты</button>
             <button
-              class="filter_btn"
-              @click.stop="toggleFilters('studentFilters', 'studentButtons')"
+              class="filter__btn"
+              @click.stop="toggleFilters('studentFilters', 'students')"
             >
               <img src="/src/assets/filter.png" alt="" />
             </button>
@@ -47,7 +47,7 @@ import { ref, defineEmits } from "vue";
 import FiltersItems from "./FiltersItems.vue";
 
 const emit = defineEmits(["category-changed"]);
-const activeButton = ref("instructorButtons");
+const activeButton = ref("instructors");
 const visibleFilters = ref(null);
 
 const toggleFilters = (filter, button) => {
@@ -59,7 +59,7 @@ const toggleButtons = (button) => {
   if (activeButton.value !== button) {
     activeButton.value = button;
     visibleFilters.value = null;
-    emit("category-changed", button)
+    emit("category-changed", button);
   }
 };
 </script>
@@ -71,7 +71,7 @@ const toggleButtons = (button) => {
   background-color: rgb(211, 170, 248);
 }
 
-.buttons_container {
+.buttons__container {
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -92,14 +92,14 @@ img {
   background-color: #ffffff;
 }
 
-.people_btn {
+.people__btn {
   padding: 8px 24px;
   border-radius: 5px 0 0 5px;
   border: none;
   width: 200px;
 }
 
-.filter_btn {
+.filter__btn {
   padding: 0 10px;
   border-radius: 0 5px 5px 0;
   border: none;
@@ -115,7 +115,7 @@ img {
   opacity: 1;
 }
 
-.buttons-filters {
+.buttons__filters {
   display: flex;
   flex-direction: column;
   align-items: end;

@@ -9,7 +9,6 @@ class SStudentSelect(BaseModel):
     first_name: str = Field(..., min_length=1, max_length=50, description="Имя студента, от 1 до 50 символов")
     last_name: str = Field(..., min_length=1, max_length=50, description="Фамилия студента, от 1 до 50 символов")
     group: str = Field(..., description="Номер группы")
-    department_id: int = Field(..., ge=1, description="ID кафедры")
     department: str = Field(..., description="Название кафедры")
     subjects: Optional[list[SStudentSubjectSelect]] = Field(None, description="Список предметов и оценок")
 
@@ -25,6 +24,7 @@ class SStudentAdd(BaseModel):
         if value and value > datetime.now().date():
             raise ValueError('Дата рождения должна быть в прошлом')
         return value
+    
     
 class SStudentUpdate(BaseModel):
     first_name: Optional[str] = Field(None, min_length=1, max_length=50, description="Имя студента, от 1 до 50 символов")
